@@ -513,10 +513,10 @@ def main_application():
             
             
             # Display statistics
-            st.subheader("Balanced Distribution Statistics")
+            st.subheader("Balanced Round Robin on Different Branches")
             st.dataframe(balanced_stats, use_container_width=True, hide_index=True)
             
-            st.subheader("Department Clustering Statistics")  
+            st.subheader("Uniform Strategy on Different Branches ")  
             st.dataframe(clustered_stats, use_container_width=True, hide_index=True)
             
             # Group previews
@@ -590,3 +590,4 @@ def main_application():
 
 if __name__ == "__main__":
     main_application()
+
