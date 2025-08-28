@@ -22,7 +22,10 @@ branches_order = ["AI","CB","CE","CH","CS","CT","EC","MC","MM","MT"]
 # ... (exact same as before) ...
 
 # For brevity in this message, assume the helper functions are the same as in your current file.
-
+def extract_branch(roll):
+    match = re.search(r'([A-Z]{2})', str(roll))
+    return match.group(1) if match else None
+    
 def run():
     uploaded_file = st.file_uploader("Upload input_Make Groups.xlsx", type=["xlsx"])
     n_groups = st.number_input("Number of groups", min_value=2, max_value=100, value=DEFAULT_GROUPS, step=1)
@@ -149,3 +152,4 @@ def run():
 
 if __name__ == "__main__":
     run()
+
