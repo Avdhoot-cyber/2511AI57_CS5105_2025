@@ -73,24 +73,7 @@ class GroupStatisticsGenerator:
             columns=columns
         )
         
-        # Populate statistics
-        for idx, group in enumerate(self.groups, start=1):
-            group_name = f"Group_{idx}"
-            
-            if group:
-                # Count students by department
-                dept_counts = defaultdict(int)
-                for record in group:
-                    if hasattr(record, 'department'):
-                        dept_counts[record.department] += 1
-                
-                # Update statistics matrix
-                for dept in sorted_departments:
-                    stats_matrix.loc[group_name, dept] = dept_counts[dept]
-                
-                stats_matrix.loc[group_name, "Total_Students"] = len(group)
         
-        return stats_matrix.reset_index().rename(columns={"index": "Group_ID"})
 
 class BalancedDistributionStrategy:
     """Implements round-robin distribution strategy for balanced groups"""
@@ -595,3 +578,4 @@ def main_application():
 
 if __name__ == "__main__":
     main_application()
+
