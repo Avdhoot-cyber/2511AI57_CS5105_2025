@@ -41,12 +41,17 @@ def make_stats(groups, n_groups):
     return stats.reset_index().rename(columns={"index": "Group"})
 
 def create_csv_files(df, mixed_groups, uniform_groups, n_groups):
-    """Create CSV files for different folder structures and return as zip."""
+    """Create CSV files in GitHub repository structure and also return as zip."""
     
-    # Create a temporary directory structure
-    zip_buffer = BytesIO()
+    # Get the base directory (where the app.py is located)
+    base_dir = Path(__file__).parent if hasattr(__builtins__, '__file__') else Path.cwd()
     
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+    try:
+        # Create directory structure in the repository
+        folders = ['full_branchwise', 'group_branchwise_mix', 'group_uniform_mix']
+        for folder in folders:
+            folder_path = base_dir / folder
+            folder_path.mkdir(exist_ok=True)
         
         # 1. Create full_branchwise folder with branch-wise CSV files
         branches = df['Branch'].unique()
@@ -54,27 +59,62 @@ def create_csv_files(df, mixed_groups, uniform_groups, n_groups):
             if branch != "??":  # Skip invalid branches
                 branch_df = df[df['Branch'] == branch][['Roll', 'Name', 'Email', 'Branch']]
                 if not branch_df.empty:
-                    csv_content = branch_df.to_csv(index=False)
-                    zip_file.writestr(f"full_branchwise/{branch}.csv", csv_content)
+                    file_path = base_dir / 'full_branchwise' / f'{branch}.csv'
+                    branch_df.to_csv(file_path, index=False)
         
         # 2. Create group_branchwise_mix folder with mixed strategy groups
         for gi, group_rows in enumerate(mixed_groups, start=1):
             if group_rows:  # Only create file if group has students
                 gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
-                csv_content = gdf.to_csv(index=False)
-                zip_file.writestr(f"group_branchwise_mix/G{gi}.csv", csv_content)
+                file_path = base_dir / 'group_branchwise_mix' / f'G{gi}.csv'
+                gdf.to_csv(file_path, index=False)
         
         # 3. Create group_uniform_mix folder with uniform strategy groups
         for gi, group_rows in enumerate(uniform_groups, start=1):
             if group_rows:  # Only create file if group has students
                 gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
-                csv_content = gdf.to_csv(index=False)
-                zip_file.writestr(f"group_uniform_mix/G{gi}.csv", csv_content)
+                file_path = base_dir / 'group_uniform_mix' / f'G{gi}.csv'
+                gdf.to_csv(file_path, index=False)
         
-        # 4. Add stats files
+        # 4. Create stats files in base directory
         stats_mixed = make_stats(mixed_groups, n_groups)
         stats_uniform = make_stats(uniform_groups, n_groups)
         
+        stats_mixed.to_csv(base_dir / 'stats_mixed.csv', index=False)
+        stats_uniform.to_csv(base_dir / 'stats_uniform.csv', index=False)
+        
+        st.success(f"✅ CSV files created in repository structure at: {base_dir}")
+        
+    except Exception as e:
+        st.warning(f"⚠️ Could not create files in repository: {e}")
+    
+    # Also create zip for download
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        
+        # Add all the files to zip
+        branches = df['Branch'].unique()
+        for branch in branches:
+            if branch != "??":
+                branch_df = df[df['Branch'] == branch][['Roll', 'Name', 'Email', 'Branch']]
+                if not branch_df.empty:
+                    csv_content = branch_df.to_csv(index=False)
+                    zip_file.writestr(f"full_branchwise/{branch}.csv", csv_content)
+        
+        for gi, group_rows in enumerate(mixed_groups, start=1):
+            if group_rows:
+                gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
+                csv_content = gdf.to_csv(index=False)
+                zip_file.writestr(f"group_branchwise_mix/G{gi}.csv", csv_content)
+        
+        for gi, group_rows in enumerate(uniform_groups, start=1):
+            if group_rows:
+                gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
+                csv_content = gdf.to_csv(index=False)
+                zip_file.writestr(f"group_uniform_mix/G{gi}.csv", csv_content)
+        
+        stats_mixed = make_stats(mixed_groups, n_groups)
+        stats_uniform = make_stats(uniform_groups, n_groups)
         zip_file.writestr("stats_mixed.csv", stats_mixed.to_csv(index=False))
         zip_file.writestr("stats_uniform.csv", stats_uniform.to_csv(index=False))
     
@@ -187,76 +227,51 @@ def uniform_strategy(df, n_groups):
 
 # --- GitHub Integration Instructions ---
 def show_github_setup():
-    st.subheader("🔧 GitHub Repository Setup")
+    st.subheader("🔧 GitHub Repository Integration")
     
-    with st.expander("📋 Step-by-step GitHub setup instructions"):
+    with st.expander("📋 How to sync generated files to your GitHub repo"):
         st.markdown("""
-        ### Steps to set up your GitHub repository:
+        ### Your Current Setup:
+        - **Repository**: `Avdhoot-cyber/2511AI57_CS5105_2025`
+        - **Branch**: `main`
+        - **App Path**: `tut_01/app.py`
         
-        1. **Create a new GitHub repository:**
-           - Go to [github.com](https://github.com) and create a new repository
-           - Name it something like `student-group-generator`
-           - Make it public or private as needed
+        ### To make the generated CSV files permanent in your GitHub repo:
         
-        2. **Clone the repository locally:**
+        1. **Run your Streamlit app** (which creates the CSV files locally)
+        
+        2. **Clone your repository locally** (if you haven't already):
            ```bash
-           git clone https://github.com/yourusername/student-group-generator.git
-           cd student-group-generator
+           git clone https://github.com/Avdhoot-cyber/2511AI57_CS5105_2025.git
+           cd 2511AI57_CS5105_2025/tut_01
            ```
         
-        3. **Create the project structure:**
+        3. **After running the app, you'll see these new folders created**:
+           ```
+           tut_01/
+           ├── full_branchwise/
+           ├── group_branchwise_mix/
+           ├── group_uniform_mix/
+           ├── stats_mixed.csv
+           └── stats_uniform.csv
+           ```
+        
+        4. **Add and commit the generated files**:
            ```bash
-           mkdir -p full_branchwise group_branchwise_mix group_uniform_mix
-           touch README.md requirements.txt
-           ```
-        
-        4. **Add the main Python file:**
-           - Save the enhanced code as `app.py` in your repository
-        
-        5. **Create requirements.txt:**
-           ```txt
-           streamlit
-           pandas
-           openpyxl
-           ```
-        
-        6. **Create README.md:**
-           ```markdown
-           # Student Group Generator
-           
-           A Streamlit application for generating balanced student groups from Excel files.
-           
-           ## Features
-           - Mixed strategy (branch-wise round robin)
-           - Uniform strategy (mono-branch groups)
-           - Automatic CSV file generation
-           - Statistics generation
-           
-           ## Usage
-           1. Run: `streamlit run app.py`
-           2. Upload Excel file with Roll, Name, Email columns
-           3. Set number of groups
-           4. Download generated files
-           
-           ## File Structure
-           - `full_branchwise/`: Branch-wise CSV files (AI.csv, CS.csv, etc.)
-           - `group_branchwise_mix/`: Mixed strategy groups (G1.csv, G2.csv, etc.)
-           - `group_uniform_mix/`: Uniform strategy groups (G1.csv, G2.csv, etc.)
-           ```
-        
-        7. **Commit and push:**
-           ```bash
-           git add .
-           git commit -m "Initial commit: Student group generator"
+           git add full_branchwise/ group_branchwise_mix/ group_uniform_mix/
+           git add stats_mixed.csv stats_uniform.csv
+           git commit -m "Add generated student group CSV files"
            git push origin main
            ```
         
-        8. **Run the application:**
-           ```bash
-           pip install -r requirements.txt
-           streamlit run app.py
-           ```
+        5. **The files will now be permanent in your GitHub repository** and visible at:
+           `https://github.com/Avdhoot-cyber/2511AI57_CS5105_2025/tree/main/tut_01`
+        
+        ### Alternative: Automatic Git Operations (Advanced)
+        You can also add git commands directly to your Streamlit app to automatically commit changes, but this requires setting up authentication tokens.
         """)
+        
+        st.warning("⚠️ **Important**: The Streamlit Cloud environment is read-only, so files created during app execution won't persist. You'll need to run the app locally to create permanent files in your repository.")
 
 # --- Main app ---
 def run():
@@ -354,9 +369,10 @@ def run():
             )
 
         # --- Show folder structure ---
-        with st.expander("📁 Generated Folder Structure"):
+        with st.expander("📁 Repository Folder Structure Created"):
             st.code("""
-student_groups_csv_files.zip
+tut_01/                           (your current app directory)
+├── app.py                        (your main streamlit app)
 ├── full_branchwise/
 │   ├── AI.csv
 │   ├── CS.csv
@@ -373,6 +389,8 @@ student_groups_csv_files.zip
 ├── stats_mixed.csv
 └── stats_uniform.csv
             """, language="text")
+            
+            st.info("💡 **Note**: Files are created directly in your GitHub repository structure. After running the app, you can commit and push these files to your GitHub repo to make them persistent.")
 
     # Show GitHub setup instructions
     show_github_setup()
