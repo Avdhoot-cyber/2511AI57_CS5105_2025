@@ -14,17 +14,20 @@ if uploaded_file is not None:
     output_dir = "full_branchwise"
     os.makedirs(output_dir, exist_ok=True)
 
-    # Extract branch code from Roll (assuming first 2 letters are branch code after digits)
-    # Example: 1401AI01 -> AI
+    # Extract branch code from Roll (e.g., 1401AI01 -> AI)
     df["Branch"] = df["Roll"].str.extract(r'([A-Z]{2})')
 
-    # Group by branch and save to CSV
+    st.subheader("Generated Branch Files")
+
     for branch, group in df.groupby("Branch"):
         file_path = os.path.join(output_dir, f"{branch}.csv")
         group.to_csv(file_path, index=False)
 
-    st.success(f"Files saved in '{output_dir}' directory.")
-
-    st.subheader("Generated Files")
-    for branch in sorted(df["Branch"].unique()):
-        st.write(f"{branch}.csv")
+        # Show count + download button
+        st.write(f"📌 **{branch}** → {len(group)} students")
+        st.download_button(
+            label=f"⬇️ Download {branch}.csv",
+            data=group.to_csv(index=False).encode("utf-8"),
+            file_name=f"{branch}.csv",
+            mime="text/csv"
+        )
