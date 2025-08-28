@@ -1,40 +1,30 @@
+import os
 import pandas as pd
 import streamlit as st
-import io
 
-st.title("📚 Branchwise Student Segregator")
+st.title("Branchwise Student Segregator")
 
-# File uploader
 uploaded_file = st.file_uploader("Upload Excel file", type=["xlsx", "xls"])
 
 if uploaded_file is not None:
-    # Read Excel file
+    # Read the Excel file
     df = pd.read_excel(uploaded_file)
 
-    st.subheader("Uploaded Data")
-    st.dataframe(df)
+    # Make directory for outputs
+    output_dir = "full_branchwise"
+    os.makedirs(output_dir, exist_ok=True)
 
-    # Extract branch from Roll number (e.g., 1401AI01 -> AI)
+    # Extract branch code from Roll (assuming first 2 letters are branch code after digits)
+    # Example: 1401AI01 -> AI
     df["Branch"] = df["Roll"].str.extract(r'([A-Z]{2})')
 
-    st.subheader("Branchwise Student Data")
-
-    # Group students by branch
+    # Group by branch and save to CSV
     for branch, group in df.groupby("Branch"):
-        st.markdown(f"### 🏷️ {branch} — {len(group)} students")
+        file_path = os.path.join(output_dir, f"{branch}.csv")
+        group.to_csv(file_path, index=False)
 
-        # Show preview
-        st.dataframe(group)
+    st.success(f"Files saved in '{output_dir}' directory.")
 
-        # Convert group to CSV (in memory)
-        csv_buffer = io.StringIO()
-        group.to_csv(csv_buffer, index=False)
-        csv_bytes = csv_buffer.getvalue().encode("utf-8")
-
-        # Download button
-        st.download_button(
-            label=f"⬇️ Download {branch}.csv",
-            data=csv_bytes,
-            file_name=f"{branch}.csv",
-            mime="text/csv"
-        )
+    st.subheader("Generated Files")
+    for branch in sorted(df["Branch"].unique()):
+        st.write(f"{branch}.csv")
