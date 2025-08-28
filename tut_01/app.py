@@ -7,6 +7,9 @@ import math
 import os
 import zipfile
 from pathlib import Path
+import requests
+import base64
+import json
 
 st.set_page_config(page_title="Group Stats Generator", page_icon="📊", layout="wide")
 
@@ -40,59 +43,174 @@ def make_stats(groups, n_groups):
     
     return stats.reset_index().rename(columns={"index": "Group"})
 
-def create_csv_files(df, mixed_groups, uniform_groups, n_groups):
-    """Create CSV files in GitHub repository structure and also return as zip."""
+def create_github_files(df, mixed_groups, uniform_groups, n_groups, github_token=None):
+    """Create CSV files directly in GitHub repository using GitHub API."""
     
-    # Get the base directory (where the app.py is located)
-    base_dir = Path(__file__).parent if hasattr(__builtins__, '__file__') else Path.cwd()
+    if not github_token:
+        st.warning("⚠️ GitHub token not provided. Files created locally only.")
+        return create_csv_files_local(df, mixed_groups, uniform_groups, n_groups)
+    
+    repo_owner = "Avdhoot-cyber"
+    repo_name = "2511AI57_CS5105_2025"
+    base_path = "tut_01"
+    
+    headers = {
+        "Authorization": f"token {github_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    
+    files_created = []
     
     try:
-        # Create directory structure in the repository
+        # 1. Create full_branchwise files
+        branches = df['Branch'].unique()
+        for branch in branches:
+            if branch != "??":
+                branch_df = df[df['Branch'] == branch][['Roll', 'Name', 'Email', 'Branch']]
+                if not branch_df.empty:
+                    csv_content = branch_df.to_csv(index=False)
+                    file_path = f"{base_path}/full_branchwise/{branch}.csv"
+                    
+                    success = create_github_file(repo_owner, repo_name, file_path, csv_content, headers)
+                    if success:
+                        files_created.append(file_path)
+        
+        # 2. Create group_branchwise_mix files
+        for gi, group_rows in enumerate(mixed_groups, start=1):
+            if group_rows:
+                gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
+                csv_content = gdf.to_csv(index=False)
+                file_path = f"{base_path}/group_branchwise_mix/G{gi}.csv"
+                
+                success = create_github_file(repo_owner, repo_name, file_path, csv_content, headers)
+                if success:
+                    files_created.append(file_path)
+        
+        # 3. Create group_uniform_mix files
+        for gi, group_rows in enumerate(uniform_groups, start=1):
+            if group_rows:
+                gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
+                csv_content = gdf.to_csv(index=False)
+                file_path = f"{base_path}/group_uniform_mix/G{gi}.csv"
+                
+                success = create_github_file(repo_owner, repo_name, file_path, csv_content, headers)
+                if success:
+                    files_created.append(file_path)
+        
+        # 4. Create stats files
+        stats_mixed = make_stats(mixed_groups, n_groups)
+        stats_uniform = make_stats(uniform_groups, n_groups)
+        
+        # Mixed stats
+        csv_content = stats_mixed.to_csv(index=False)
+        file_path = f"{base_path}/stats_mixed.csv"
+        success = create_github_file(repo_owner, repo_name, file_path, csv_content, headers)
+        if success:
+            files_created.append(file_path)
+        
+        # Uniform stats
+        csv_content = stats_uniform.to_csv(index=False)
+        file_path = f"{base_path}/stats_uniform.csv"
+        success = create_github_file(repo_owner, repo_name, file_path, csv_content, headers)
+        if success:
+            files_created.append(file_path)
+        
+        if files_created:
+            st.success(f"✅ Successfully created {len(files_created)} files in GitHub repository!")
+            st.info(f"🔗 View files at: https://github.com/{repo_owner}/{repo_name}/tree/main/{base_path}")
+            
+            with st.expander("📁 Files created in GitHub"):
+                for file_path in files_created:
+                    st.write(f"- {file_path}")
+        else:
+            st.error("❌ No files were created in GitHub repository")
+            
+    except Exception as e:
+        st.error(f"❌ Error creating files in GitHub: {e}")
+    
+    # Also create zip for download
+    return create_zip_download(df, mixed_groups, uniform_groups, n_groups)
+
+def create_github_file(owner, repo, file_path, content, headers):
+    """Create a single file in GitHub repository using the API."""
+    
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}"
+    
+    # Encode content to base64
+    content_encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+    
+    data = {
+        "message": f"Add {file_path}",
+        "content": content_encoded,
+        "branch": "main"
+    }
+    
+    try:
+        # Check if file exists
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            # File exists, update it
+            existing_file = response.json()
+            data["sha"] = existing_file["sha"]
+            data["message"] = f"Update {file_path}"
+        
+        # Create or update file
+        response = requests.put(url, headers=headers, json=data)
+        return response.status_code in [200, 201]
+        
+    except Exception as e:
+        st.error(f"Error creating {file_path}: {e}")
+        return False
+
+def create_csv_files_local(df, mixed_groups, uniform_groups, n_groups):
+    """Create CSV files locally (fallback when no GitHub token)."""
+    
+    base_dir = Path("/mount/src/2511ai57_cs5105_2025/tut_01")  # Streamlit Cloud path
+    
+    try:
         folders = ['full_branchwise', 'group_branchwise_mix', 'group_uniform_mix']
         for folder in folders:
             folder_path = base_dir / folder
             folder_path.mkdir(exist_ok=True)
         
-        # 1. Create full_branchwise folder with branch-wise CSV files
+        # Create files locally (same as before)
         branches = df['Branch'].unique()
         for branch in branches:
-            if branch != "??":  # Skip invalid branches
+            if branch != "??":
                 branch_df = df[df['Branch'] == branch][['Roll', 'Name', 'Email', 'Branch']]
                 if not branch_df.empty:
                     file_path = base_dir / 'full_branchwise' / f'{branch}.csv'
                     branch_df.to_csv(file_path, index=False)
         
-        # 2. Create group_branchwise_mix folder with mixed strategy groups
         for gi, group_rows in enumerate(mixed_groups, start=1):
-            if group_rows:  # Only create file if group has students
+            if group_rows:
                 gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
                 file_path = base_dir / 'group_branchwise_mix' / f'G{gi}.csv'
                 gdf.to_csv(file_path, index=False)
         
-        # 3. Create group_uniform_mix folder with uniform strategy groups
         for gi, group_rows in enumerate(uniform_groups, start=1):
-            if group_rows:  # Only create file if group has students
+            if group_rows:
                 gdf = pd.DataFrame(group_rows)[['Roll', 'Name', 'Email', 'Branch']]
                 file_path = base_dir / 'group_uniform_mix' / f'G{gi}.csv'
                 gdf.to_csv(file_path, index=False)
         
-        # 4. Create stats files in base directory
         stats_mixed = make_stats(mixed_groups, n_groups)
         stats_uniform = make_stats(uniform_groups, n_groups)
-        
         stats_mixed.to_csv(base_dir / 'stats_mixed.csv', index=False)
         stats_uniform.to_csv(base_dir / 'stats_uniform.csv', index=False)
         
-        st.success(f"✅ CSV files created in repository structure at: {base_dir}")
+        st.info(f"📁 CSV files created locally at: {base_dir}")
         
     except Exception as e:
-        st.warning(f"⚠️ Could not create files in repository: {e}")
+        st.warning(f"⚠️ Could not create local files: {e}")
     
-    # Also create zip for download
+    return create_zip_download(df, mixed_groups, uniform_groups, n_groups)
+
+def create_zip_download(df, mixed_groups, uniform_groups, n_groups):
+    """Create zip file for download."""
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         
-        # Add all the files to zip
         branches = df['Branch'].unique()
         for branch in branches:
             if branch != "??":
@@ -277,6 +395,22 @@ def show_github_setup():
 def run():
     uploaded_file = st.file_uploader("Upload input_Make Groups.xlsx", type=["xlsx"])
     n_groups = st.number_input("Number of groups", min_value=2, max_value=100, value=DEFAULT_GROUPS, step=1)
+    
+    # GitHub token input (optional)
+    with st.expander("🔧 GitHub Integration (Optional)"):
+        st.markdown("""
+        **To create files directly in your GitHub repository**, provide a GitHub Personal Access Token:
+        
+        1. Go to [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+        2. Generate a new token with `repo` scope
+        3. Enter it below (it will be used only for this session)
+        """)
+        
+        github_token = st.text_input(
+            "GitHub Personal Access Token", 
+            type="password", 
+            help="Optional: Provide token to create files directly in GitHub repo"
+        )
 
     if uploaded_file:
         try:
@@ -327,6 +461,12 @@ def run():
                     gdf = pd.DataFrame(group_rows)
                     st.dataframe(gdf[["Roll","Name","Email","Branch"]], use_container_width=True, hide_index=True)
 
+        # --- Create files and downloads ---
+        if github_token:
+            csv_zip = create_github_files(df, mixed_groups, uniform_groups, n_groups, github_token)
+        else:
+            csv_zip = create_csv_files_local(df, mixed_groups, uniform_groups, n_groups)
+
         # --- Download options ---
         col1, col2 = st.columns(2)
         
@@ -356,16 +496,14 @@ def run():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
 
-        # New CSV files download
+        # CSV files download
         with col2:
-            csv_zip = create_csv_files(df, mixed_groups, uniform_groups, n_groups)
-            
             st.download_button(
                 label="📁 Download CSV Files (Zip)",
                 data=csv_zip,
                 file_name="student_groups_csv_files.zip",
                 mime="application/zip",
-                help="Downloads all CSV files organized in folders: full_branchwise, group_branchwise_mix, group_uniform_mix"
+                help="Downloads all CSV files organized in folders"
             )
 
         # --- Show folder structure ---
