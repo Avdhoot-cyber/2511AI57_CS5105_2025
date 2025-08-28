@@ -226,6 +226,8 @@ def run():
             data=output,
             file_name="output.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
+        )
+
 
 run()
+
