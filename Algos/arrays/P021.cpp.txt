@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+pair<int,int> twoSum(vector<int>& nums,int target) {
+    unordered_map<int,int> v;
+    int n = nums.size();
+    for(int i=0;i<n;i++){
+        v[nums[i]] = i;
+        
+        if(v.find(target-nums[i])!=v.end()){
+            return {v[target-nums[i]],i};
+        }
+    }
+    return {};
+}
+
+vector<int> getarr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+
+void printarr(vector<int> &a){
+    cout<<"[";
+    for(int i=0;i<a.size();i++){
+        cout<<a[i]<<", ";
+    }
+    cout<<"]";
+}
+
+int main(){
+    
+    vector<int>arr1 = getarr();
+    int k;
+    cin>>k;
+    auto [i,j] = twoSum(arr1,k);
+    cout<<"["<<i<<", "<<j<<"]";
+    return 0;
+}

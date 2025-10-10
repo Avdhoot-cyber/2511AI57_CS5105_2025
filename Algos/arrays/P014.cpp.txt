@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+//[-2, -3, -7, -2, -10, -4]
+
+int optimalLongestConsecutive(vector<int>& nums) {
+        int longest = 0,curr_len;
+        unordered_set v(nums.begin(),nums.end());
+        for(int num:v){
+            if(!v.count(num-1)){
+                curr_len=1;
+                while(v.count(num+1)){
+                    curr_len++;
+                    num++;
+                }
+                longest = max(longest,curr_len);
+            }
+        }
+        return longest;
+    }
+
+int main(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    
+    
+    int ans = optimalLongestConsecutive(arr);
+    cout<<ans;
+    return 0;
+}

@@ -1,0 +1,32 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void optimalRemDup(int arr[],int n){
+    int index=0,i=0;
+    for(int i=0;i<n;i++){
+        while(arr[i]==arr[i+1]){
+            i++;
+        }
+        arr[index] = arr[i];
+        index++;
+    }
+    while(index<n){
+        arr[index]=-1;
+        index++;
+    }
+}
+
+int main(){
+    int n;
+    cout<<"enter array len:";
+    cin>>n;
+    int arr[n];
+    for(int i=0;i<n;i++){
+        cin>>arr[i];
+    }
+    optimalRemDup(arr,n);
+    for(int i=0;i<n;i++){
+        cout<<arr[i]<<" ";
+    }
+    return 0;
+}

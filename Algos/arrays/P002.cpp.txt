@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+pair<int,int> optimal(int arr[],int n){
+    int second_largest,second_smallest,largest=INT_MIN, smallest=INT_MAX;
+    int l_i,s_i;
+    
+    for(int i=0;i<n;i++){
+        if(arr[i]>largest){
+            largest = arr[i];
+            l_i = i;
+        }
+        if(arr[i]<smallest){
+            smallest = arr[i];
+            s_i = i;
+        }
+    }
+    second_largest=INT_MIN, second_smallest=INT_MAX;
+    for(int i=0;i<n;i++){
+        if(i==l_i || i==s_i){
+            continue;
+        }
+        if(arr[i]>second_largest){
+            second_largest = arr[i];
+        }
+        if(arr[i]<second_smallest){
+            second_smallest = arr[i];
+        }
+    }
+    
+    return {second_largest,second_smallest};
+}
+
+int main(){
+    int n;
+    cout<<"enter array len:";
+    cin>>n;
+    int arr[n];
+    for(int i=0;i<n;i++){
+        cin>>arr[i];
+    }
+    auto [s_largest,s_smallest] = optimal(arr,n);
+    cout<<s_largest<<" "<<s_smallest;
+    return 0;
+}

@@ -1,0 +1,42 @@
+#include<bits/stdc++.h>
+using namespace std;
+//[-2, -3, -7, -2, -10, -4]
+
+int optimalsubarraySum(vector<int>& nums, int k) {
+        unordered_map<int,int> v;
+        v[0] = 1;
+        int prefix_sum=0,sub=0;
+
+        for(int num:nums){
+            prefix_sum+=num;
+            
+            if(v.count(prefix_sum-k)){
+                sub+=v[prefix_sum-k];
+            }
+            v[prefix_sum]++;
+        }
+        return sub;
+    }
+
+int main(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    int k;
+    cout<<"k:";
+    cin>>k;
+    int ans = subarraySum(arr,k);
+    cout<<ans;
+    return 0;
+}

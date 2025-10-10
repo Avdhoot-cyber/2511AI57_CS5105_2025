@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+//Input: nums = [10, 5, 2, 7, 1, 9],  k=15
+
+int longestSubarray(vector<int>& nums,int target) {
+    int n = nums.size(),sum_ = 0,max_len = 0;
+    vector<int> prefix_sum(n);
+    unordered_map<int,int> v;
+    
+    for(int i=0;i<n;i++){
+        sum_+=nums[i];
+        prefix_sum[i] = sum_; 
+    }
+    v[0] = -1;
+    for(int i=0;i<n;i++){
+        if(!v.count(prefix_sum[i])){
+            v[prefix_sum[i]] = i;
+        }
+        
+        if(v.find(prefix_sum[i]-target)!=v.end()){
+            max_len = max(max_len,i-v[prefix_sum[i]-target]);
+        }
+    }
+    return max_len;
+}
+
+vector<int> getarr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+
+void printarr(vector<int> &a){
+    cout<<"[";
+    for(int i=0;i<a.size();i++){
+        cout<<a[i]<<", ";
+    }
+    cout<<"]";
+}
+
+int main(){
+    
+    vector<int>arr1 = getarr();
+    int k;
+    cin>>k;
+    int num = longestSubarray(arr1,k);
+    cout<<num;
+    return 0;
+}

@@ -1,0 +1,37 @@
+#include<bits/stdc++.h>
+using namespace std;
+//[-2, -3, -7, -2, -10, -4]
+
+int maxProfit(vector<int>& prices) {
+        int min_price = prices[0],n = prices.size(),max_profit=0;
+
+        for(int i=1;i<n;i++){
+            if(prices[i]<min_price) min_price = prices[i];
+            else{
+                max_profit = max(max_profit,prices[i]-min_price);
+            }
+        }
+        return max_profit;
+    }
+
+int main(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> prices;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            prices.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        prices.push_back(stoi(num));
+    }
+    
+    
+    int max_profit = maxProfit(prices);
+    cout<<max_profit;
+    return 0;
+}

@@ -1,0 +1,31 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int optimalMissingNum(int arr[],int n){
+    unordered_map<int,int> v;
+    for(int i=0;i<n;i++){
+        if(v.find(arr[i])==v.end()){
+            v[arr[i]] = 1;
+        }
+    }
+    for(int i=0;i<=n;i++){
+        if(v.find(i)==v.end()){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int main(){
+    int n;
+    cout<<"enter array len:";
+    cin>>n;
+    int arr[n];
+    for(int i=0;i<n;i++){
+        cin>>arr[i];
+    }
+    
+    int missingNum = optimalMissingNum(arr,n);
+    cout<<missingNum;
+    return 0;
+}

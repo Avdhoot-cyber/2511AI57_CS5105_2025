@@ -1,0 +1,37 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int singleNumber(vector<int>& nums) {
+        int single_num = 0;
+        for(int num:nums){
+            single_num^=num;
+        }
+        return single_num;
+    }
+
+vector<int> getarr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+
+int main(){
+    
+    vector<int>arr = getarr();
+
+    int num = singleNumber(arr);
+    cout<<num;
+    return 0;
+}

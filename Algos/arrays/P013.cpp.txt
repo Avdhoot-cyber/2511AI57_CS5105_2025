@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+//[-2, -3, -7, -2, -10, -4]
+
+vector<int> countLeaders(vector<int>& prices) {
+    int n = prices.size(),max_elem = prices[n-1];
+    vector<int> leaders;
+    leaders.push_back(max_elem);
+    for(int i=n-2;i>=0;i--){
+        if(prices[i]>max_elem){
+            leaders.push_back(prices[i]);
+            max_elem = prices[i];
+        }
+    }
+    reverse(leaders.begin(),leaders.end());
+    return leaders;
+}
+
+int main(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> prices;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            prices.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        prices.push_back(stoi(num));
+    }
+    
+    
+    vector<int> leaders = countLeaders(prices);
+    cout<<"[";
+    for(int i=0;i<leaders.size();i++){
+        cout<<leaders[i]<<", ";
+    }
+    cout<<"]";
+    return 0;
+}

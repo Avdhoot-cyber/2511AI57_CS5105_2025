@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int optimalKadanesAlgo(vector<int> arr){
+    int max_sum = arr[0],curr_sum = arr[0],n = arr.size();
+    for(int i=1;i<n;i++){
+        curr_sum+=arr[i];
+        max_sum = max(max_sum,curr_sum);
+        
+        if(curr_sum<0){
+            curr_sum = 0;
+        }
+    }
+    return max_sum;
+}
+
+vector<int> getarr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+
+int main(){
+    
+    vector<int>arr = getarr();
+
+    int num = optimalKadanesAlgo(arr);
+    cout<<num;
+    return 0;
+}
+
