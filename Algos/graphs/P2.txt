@@ -1,0 +1,44 @@
+// Input: adj[][] = [[2],[1,3],[2],[5],[4,6],[5]]
+#include<unordered_map>
+#include<iostream>
+#include<vector>
+using namespace std;
+
+void dfs(vector<vector<int>> adj,int vertex,unordered_map<int,int> &v,vector<int> &ans){
+    if(!v[vertex]){
+        v[vertex] = 1;
+        ans.push_back(vertex);
+        
+        for(int i=0;i<adj[vertex-1].size();i++){
+            dfs(adj,adj[vertex-1][i],v,ans);
+        }
+    }
+}
+
+int numOfProv(vector<vector<int>> adj, vector<int>& ans){
+    unordered_map<int,int> v;
+    int count=0;
+    for(int i=1;i<=adj.size();i++){
+        if(v.size()==adj.size()){
+            return count;
+        }
+        int init_v_size = v.size();
+        dfs(adj,i,v,ans);
+        if(init_v_size!=v.size()){
+            count+=1;
+        }
+        
+    }
+    return count;
+}
+
+int main(){
+    
+    vector<vector<int>> adj = {{2},{1,3},{2},{5},{4,6},{5},{8},{7}};
+    
+    vector<int> ans;
+    int n = numOfProv(adj,ans);
+    cout<<n;
+
+    return 0;
+}

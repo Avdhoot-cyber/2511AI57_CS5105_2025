@@ -1,0 +1,24 @@
+class Solution {
+  public:
+    // Function to return Breadth First Traversal of given graph.
+    vector<int> bfs(vector<vector<int>> &adj) {
+        // Code here
+        unordered_map<int,int> v;
+        int N = adj.size();
+        vector<int> arr(N),ans;
+        int front = 0, rear = 0;
+        arr[front] = 0;
+        v[0] = 1;
+        while(front<=rear){
+            for(int i=0;i<adj[arr[front]].size();i++){
+                if(v.find(adj[arr[front]][i])==v.end()){
+                    v[adj[arr[front]][i]] = 1;
+                    arr[++rear] = adj[arr[front]][i];
+                }
+            }
+            ans.push_back(arr[front]);
+            front++;
+        }
+        return ans;
+    }    
+};
