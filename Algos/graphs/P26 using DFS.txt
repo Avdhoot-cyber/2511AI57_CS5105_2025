@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    bool dfs(int node, vector<vector<int>> &graph, vector<int> &visited,
+             vector<int> &pathVisit, vector<int> &check) {
+
+        visited[node] = 1;
+        pathVisit[node] = 1;
+
+        for (auto neighbour : graph[node]) {
+            if (!visited[neighbour]) {
+                if (dfs(neighbour, graph, visited, pathVisit, check))
+                    return true; // cycle found
+            } 
+            else if (pathVisit[neighbour]) {
+                return true; // back edge found → cycle
+            }
+        }
+
+        pathVisit[node] = 0;
+        check[node] = 1; // mark node as safe
+        return false;
+    }
+
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        int v = graph.size();
+        vector<int> visited(v, 0), pathVisit(v, 0), check(v, 0);
+
+        for (int i = 0; i < v; i++) {
+            if (!visited[i]) {
+                dfs(i, graph, visited, pathVisit, check);
+            }
+        }
+
+        vector<int> safeStates;
+        for (int i = 0; i < v; i++) {
+            if (check[i]) safeStates.push_back(i);
+        }
+        return safeStates;
+    }
+};
+
+// ---- Helper functions ----
+vector<vector<int>> getGraph(string s) {
+    vector<int> temp;
+    int lastBrac = s.length() - 1, index = 0;
+    string num = "";
+    vector<vector<int>> adjList;
+    for (char c : s) {
+        if (isdigit(c) || c == '-') {
+            num += c;
+        } else if (!num.empty()) {
+            temp.push_back(stoi(num));
+            num = "";
+        }
+
+        if (c == ']' && index != lastBrac) {
+            adjList.push_back(temp);
+            temp.clear();
+        }
+        index++;
+    }
+    return adjList;
+}
+
+void printAdjList(vector<vector<int>> &adjList) {
+    cout << "[\n";
+    for (auto &v : adjList) {
+        cout << "[";
+        for (auto x : v) cout << x << " ";
+        cout << "]\n";
+    }
+    cout << "]\n";
+}
+
+void printVec(vector<int> &v) {
+    cout << "[";
+    for (auto x : v) cout << x << " ";
+    cout << "]";
+}
+
+int main() {
+    string s;
+    getline(cin, s);
+    vector<vector<int>> graph = getGraph(s);
+    Solution S;
+    printAdjList(graph);
+    vector<int> safeStates = S.eventualSafeNodes(graph);
+    printVec(safeStates);
+    return 0;
+}

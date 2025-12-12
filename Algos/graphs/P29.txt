@@ -1,0 +1,99 @@
+//6 0
+//[[0,1,2],[0,4,1],[4,5,4],[4,2,2],[1,2,3],[2,3,6],[5,3,1]]
+
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution{
+public:
+    vector<int> shortestPathsWeightedDAG(vector<vector<pair<int,int>>> &graph,int v,int src){
+        
+        vector<int> inDegree(v,0), dist(v,INT_MAX);
+        for(int i=0;i<v;i++){
+            for(auto n:graph[i]){
+                inDegree[n.first]++;
+            }
+        }
+        queue<int> q;
+        
+        for(int i=0;i<v;i++){
+            if(inDegree[i]==0){
+                q.push(i);
+            }
+        }
+        
+        dist[src] = 0;
+        
+        while(!q.empty()){
+            int V = q.front(); q.pop();
+            for(auto n:graph[V]){
+                int nxt = n.first, w = n.second;
+                inDegree[nxt]--;
+                if(dist[V]!=INT_MAX && dist[V]+ w < dist[nxt]){
+                    dist[nxt] = dist[V] + w;
+                }
+                if(inDegree[nxt]==0){
+                    q.push(nxt);
+                }
+            }
+        }
+        return dist;
+    }
+};
+
+vector<vector<pair<int,int>>> makeWeightedDAG(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<pair<int,int>>> adjList(v);
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            if(j==3){
+                int v1 = temp[0],v2 = temp[1],w = temp[2];
+                temp.clear();
+                adjList[v1].push_back({v2,w});
+                j=0;
+            }
+        }
+    }
+    return adjList;
+}
+
+void printVec(vector<int> &v) {
+    cout << "[";
+    for (auto x : v) cout << x << " ";
+    cout << "]";
+}
+
+void printWeightedAdjList(vector<vector<pair<int,int>>> &adjList) {
+    int v = adjList.size();
+    cout << "[\n";
+    for (int i=0;i<v;i++) {
+        cout << "[";
+        for (auto &n : adjList[i]) cout << n.first << " (" << n.second<< ") ";
+        cout << "]\n";
+    }
+    cout << "]\n";
+}
+
+int main(){
+    int v,src;
+    cin>>v>>src;
+    Solution S;
+    string s;
+    cin.ignore();
+    getline(cin,s);
+    vector<vector<pair<int,int>>> graph = makeWeightedDAG(s,v);
+    printWeightedAdjList(graph);
+    vector<int> shortestPath = S.shortestPathsWeightedDAG(graph,v,src);
+    printVec(shortestPath);
+    return 0;
+}

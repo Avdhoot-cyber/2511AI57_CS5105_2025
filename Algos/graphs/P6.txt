@@ -1,0 +1,119 @@
+// 0 5 
+// [[0, 1, 4], [0, 2, 8], [1, 4, 6], [2, 3, 2], [3, 4, 10]] 
+
+
+#include<bits/stdc++.h>
+using namespace std;
+
+
+
+
+struct cmp{
+    bool operator()(pair<int,int> a,pair<int,int> b){
+        return a.second>b.second;
+    }
+};
+
+class Solution {
+public:
+    
+    vector<int> dijkstra(vector<vector<pair<int,int>>> &graph,int source){
+        priority_queue<pair<int,int>, vector<pair<int,int>>,cmp> pq;
+        int v = graph.size();
+        vector<int> visited(v,0),dist(v,INT_MAX);
+        for(int i=0;i<v;i++){
+            if(i==source){
+                pq.push(pair{i,0});
+                dist[i] = 0;
+            }else{
+                dist[i] = INT_MAX;
+            }
+            
+        }
+        
+        for(int iter=0;iter<v;iter++){
+            
+            if(pq.empty()) break;
+            
+            auto [V,d] = pq.top();
+            pq.pop();
+            dist[V] = d;
+            visited[V] = 1;
+            
+            for(int i=0;i<graph[V].size();i++){
+                if(dist[V]==INT_MAX){
+                    continue;
+                }
+                if(!visited[graph[V][i].first] && dist[V]+graph[V][i].second<dist[graph[V][i].first]){
+                    dist[graph[V][i].first] = dist[V]+graph[V][i].second;
+                    pq.push(pair{graph[V][i].first,dist[graph[V][i].first]});
+                }
+            }
+        }
+        return dist;
+    }
+};
+
+tuple<vector<vector<pair<int,int>>>,int,int> getWeightedGraph(){
+    string s,num="";
+    vector<int> nums;
+    int src,v;
+    cin>>src>>v;
+    cin.ignore();
+    getline(cin,s);
+    vector<vector<pair<int,int>>> adjList(v);
+    int index = 0;
+    for(char c:s){
+        if(index>=3){
+            adjList[nums[0]].push_back(pair{nums[1],nums[2]});
+            adjList[nums[1]].push_back(pair{nums[0],nums[2]});
+            index = 0;
+            nums.clear();
+        }
+        
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            nums.push_back(stoi(num));
+            index++;
+            num = "";
+        }
+    }
+    if(index>=3){
+            adjList[nums[0]].push_back(pair{nums[1],nums[2]});
+            adjList[nums[1]].push_back(pair{nums[0],nums[2]});
+            index = 0;
+            nums.clear();
+        }
+    return tuple{adjList,src,v};
+}
+
+void printAdjListWeighted(vector<vector<pair<int,int>>> &adjList){
+    int v = adjList.size();
+    cout<<"[\n";
+    for(int i=0;i<v;i++){
+        cout<<"[";
+        for(int j=0;j<adjList[i].size();j++){
+            cout<<adjList[i][j].first<<"{"<<adjList[i][j].second<<"} ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]";
+}
+
+void printVec(vector<int> &v){
+    cout<<"[";
+    for(int i=0;i<v.size();i++){
+        cout<<v[i]<<" ";
+    }
+    cout<<"]";
+}
+
+int main(){
+    Solution S;
+    auto [adjList,src,V] = getWeightedGraph();
+    printAdjListWeighted(adjList);
+    auto dist = S.dijkstra(adjList,src);
+    printVec(dist);
+    return 0;
+}

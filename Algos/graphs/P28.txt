@@ -1,0 +1,81 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution{
+public:
+    vector<int> shortestPaths(vector<vector<int>> &graph, int v,int src){
+        vector<int> visited(v,0), shortestPath(v,0);
+        queue<pair<int,int>> q;
+        q.push({src,0});
+        visited[src] = 1;
+        while(!q.empty()){
+            auto [v,d] = q.front(); q.pop();
+            shortestPath[v] = d;
+            for(int n:graph[v]){
+                if(!visited[n]){
+                    q.push({n,d+1});
+                    visited[n] = 1;
+                }
+            }
+        }
+        
+        return shortestPath;
+    }    
+};
+
+vector<vector<int>> makeGraph(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> adjList(v);
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            if(j==2){
+                int v1 = temp[0],v2 = temp[1];
+                temp.clear();
+                adjList[v1].push_back(v2);
+                adjList[v2].push_back(v1);
+                j=0;
+            }
+        }
+    }
+    return adjList;
+}
+
+void printVec(vector<int> &v) {
+    cout << "[";
+    for (auto x : v) cout << x << " ";
+    cout << "]";
+}
+
+void printAdjList(vector<vector<int>> &adjList) {
+    cout << "[\n";
+    for (auto &v : adjList) {
+        cout << "[";
+        for (auto x : v) cout << x << " ";
+        cout << "]\n";
+    }
+    cout << "]\n";
+}
+
+int main(){
+    int v,src;
+    cin>>v>>src;
+    Solution S;
+    string s;
+    cin.ignore();
+    getline(cin,s);
+    vector<vector<int>> graph = makeGraph(s,v);
+    // printAdjList(graph);
+    vector<int> shortestPath = S.shortestPaths(graph,v,src);
+    printVec(shortestPath);
+    return 0;
+}

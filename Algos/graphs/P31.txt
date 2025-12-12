@@ -1,0 +1,105 @@
+// 4 0 3 1
+// [[0,1,100],[1,2,100],[2,0,100],[1,3,600],[2,3,200]]
+
+#include<bits/stdc++.h>
+using namespace std;
+
+void printWeightedAdjList(vector<vector<pair<int,int>>> &adjList);
+
+struct cmp{
+    bool operator()(tuple<int,int,int> a,tuple<int,int,int> b){
+        return get<2>(a)>get<2>(b);
+    }
+};
+
+class Solution{
+public:
+    
+    int findCheapestPrice(int n, vector<vector<int>>& flights, int src, int dst, int k) {
+        vector<int> dist(n,INT_MAX);
+        
+        vector<vector<pair<int,int>>> graph(n);
+        for(auto flight:flights){
+            int s_f = flight[0],d_f = flight[1],w = flight[2];
+            graph[s_f].push_back({d_f,w});
+        }
+        
+        printWeightedAdjList(graph);
+        
+        queue<tuple<int,int,int>> q;
+        q.push({0,src,0});
+        while(!q.empty()){
+            auto [stops,V,d] = q.front(); q.pop();
+            
+            if(d==INT_MAX) continue;
+            for(auto x:graph[V]){
+                int n = x.first,w = x.second;
+                
+                if(d+w<dist[n] && stops<=k){
+                    dist[n] = d+w;
+                    q.push({stops+1,n,dist[n]});
+                }
+            }
+        }
+        
+        if(dist[dst]==INT_MAX) return -1;
+        return dist[dst];
+    }
+};
+
+vector<vector<int>> makeWeightedEdges(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> flights;
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            }
+        
+        
+        if(j==3){
+            flights.push_back(temp);
+            temp.clear();
+            j = 0;
+        }
+    }
+    return flights;
+}
+
+void printVec(vector<int> &v) {
+    cout << "[";
+    for (auto x : v) cout << x << " ";
+    cout << "]";
+}
+
+void printWeightedAdjList(vector<vector<pair<int,int>>> &adjList) {
+    int v = adjList.size();
+    cout << "[\n";
+    for (int i=0;i<v;i++) {
+        cout << "[";
+        for (auto &n : adjList[i]) cout << n.first << " (" << n.second<< ") ";
+        cout << "]\n";
+    }
+    cout << "]\n";
+}
+
+int main(){
+    int v,src,dst,k;
+    cin>>v>>src>>dst>>k;
+    Solution S;
+    string s;
+    cin.ignore();
+    getline(cin,s);
+    vector<vector<int>> flights = makeWeightedEdges(s,v);
+    int lowestPrice = S.findCheapestPrice(v,flights,src,dst,k);
+    cout<<lowestPrice;
+    return 0;
+}

@@ -1,0 +1,113 @@
+
+#include<bits/stdc++.h>
+using namespace std;
+
+
+//Input Format: n=6  stones = [[0, 0],[ 0, 1], [1, 0],[1, 2],[2, 1],[2, 2]]
+
+class DisjointSet{
+public:
+    vector<int> parent,rank;
+    DisjointSet(int n){
+        parent.resize(n);
+        rank.resize(n,0);
+        
+        for(int i=0;i<n;i++){
+            parent[i] = i;
+        }
+        
+    }
+    
+    int findUPar(int a){
+        if(parent[a]==a){
+            return a;
+        }
+        
+        return parent[a] = findUPar(parent[a]);
+    }
+    
+    void UnionbyRank(int a,int b){
+        int p_a = findUPar(a),p_b = findUPar(b);
+        
+        if(p_a==p_b) return;
+        
+        if(rank[p_a]==rank[p_b]){
+            rank[p_a]++;
+            parent[p_b] = p_a;
+        }else if(rank[p_a]>rank[p_b]){
+            parent[p_b] = p_a;
+        }else{
+            parent[p_a] = p_b;
+        }
+    }
+       
+};
+
+class Solution {
+public:
+    int removeStones(vector<vector<int>>& stones) {
+        int maxRow=0,maxCol=0,n = stones.size();
+        
+        for(int i=0;i<n;i++){
+            int row = stones[i][0],col = stones[i][1];
+            maxRow = max(maxRow,row);
+            maxCol = max(maxCol,col);
+        }
+        unordered_map<int,int> um;
+        int rows = maxRow+1,cols = maxCol+1;
+        DisjointSet ds(rows+cols);
+        
+        for(auto &stone:stones){
+            int stoneRow = stone[0], stoneCol = stone[1];
+            
+            ds.UnionbyRank(stoneRow,rows+stoneCol);
+            um[stoneRow] = 1;
+            um[stoneCol+rows] = 1;
+        }
+        int comps = 0;
+        for(int i=0;i<(rows+cols);i++){
+            if(um.count(i) && ds.findUPar(i)==i){
+                comps++;
+            }
+        }
+        // cout<<comps;
+        return n-comps;
+    }
+};
+
+vector<vector<int>> makeEdges(string s){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> mat;
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            }
+        
+        
+        if(j==2){
+            mat.push_back(temp);
+            temp.clear();
+            j = 0;
+        }
+    }
+    return mat;
+}
+
+int main(){
+    string s;
+    getline(cin,s);
+    vector<vector<int>> stones = makeEdges(s);
+    Solution S;
+    int maxStonesRemoved = S.removeStones(stones);
+    cout<<maxStonesRemoved;
+    return 0;
+}

@@ -1,0 +1,86 @@
+// Input: V = 5, edges[][] = [[0, 1], [0, 2], [0, 3], [1, 2], [3, 4]]
+// 4 [[0, 1], [1, 2], [2, 3]]
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution{
+    public:
+    bool detectCycleviaBfs(vector<vector<int>> &graph,int V){
+        queue<pair<int,int>> q;
+        vector<int> visited(V,0);
+        
+        for(int j=0;j<V;j++){
+            if(!visited[j]){
+                q.push(pair{j,-1});
+                visited[j] = 1;
+                while(!q.empty()){
+                    auto [v,parent] = q.front(); q.pop();
+                    for(int i=0;i<graph[v].size();i++){
+                        if(!visited[graph[v][i]]){
+                            q.push(pair{graph[v][i],v});
+                            visited[graph[v][i]] = 1;
+                        }else if(graph[v][i]!=parent){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+};
+
+vector<vector<int>> makeAdjList(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> adjList(v);
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            if(j==2){
+                int v1 = temp[0],v2 = temp[1];
+                temp.clear();
+                adjList[v1].push_back(v2);
+                adjList[v2].push_back(v1);
+                j=0;
+            }
+        }
+    }
+    return adjList;
+}
+
+void printAdjList(vector<vector<int>> &adjList){
+    int v = adjList.size();
+    cout<<"[\n";
+    for(int i=0;i<v;i++){
+        cout<<"[";
+        for(int j=0;j<adjList[i].size();j++){
+            cout<<adjList[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]\n";
+}
+
+int main(){
+    int v;
+    cin>>v;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    vector<vector<int>> adjList = makeAdjList(s,v);
+    printAdjList(adjList);
+    Solution S;
+    bool ans = S.detectCycleviaBfs(adjList,v);
+    ans?cout<<"true":cout<<"false";
+    return 0;
+}

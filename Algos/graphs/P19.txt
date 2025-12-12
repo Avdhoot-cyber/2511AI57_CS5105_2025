@@ -1,0 +1,98 @@
+// hit cog
+// ["hot","dot","dog","lot","log","cog"]
+
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> us(wordList.begin(),wordList.end());
+        queue<tuple<string,string,vector<string>,int>> q;
+        
+        if(us.find(endWord)==us.end()){
+            return {};
+        }
+        int smallestDist = -1;
+        vector<string> traversal;
+        traversal.push_back(beginWord);
+        q.push({beginWord,"",traversal,1});
+        vector<char> alphaList = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+        vector<vector<string>> ladders;
+        while(!q.empty()){
+            
+            auto [s,parent,vec,d] = q.front(); q.pop();
+            
+            
+            if(s==endWord && smallestDist == -1){
+                ladders.push_back(vec);
+                smallestDist = d;
+                continue;
+            }else if(s==endWord && d == smallestDist){
+                ladders.push_back(vec);
+                continue;
+            }else if(smallestDist!=-1 && d>smallestDist) continue;
+            
+            string orgS = s;
+            for(int i=0;i<s.length();i++){
+                
+                char orgChar = s[i];
+                for(char c: alphaList){
+                    if(c!= orgChar){
+                        s[i] = c;
+                        if(s!=parent && us.find(s)!=us.end()){
+                            vec.push_back(s);
+                            q.push({s,orgS,vec,d+1});
+                            vec.pop_back();
+                        }
+                    }
+                }
+                s[i] = orgChar;
+            }
+        }
+        
+        return ladders;
+    }
+};
+
+vector<string> getWordList(string s){
+    vector<string> wordList;
+    string num = "";
+    for(int i=0;i<s.length();i++){
+        if(s[i]=='"'){
+            i++;
+            while(s[i]!='"'){
+                if(isalpha(s[i])){
+                    num+=s[i];
+                }else{
+                    num = "";
+                }
+                i++;
+            }
+            wordList.push_back(num);
+            num = "";
+        }
+    }
+    return wordList;
+}
+
+int main(){
+    Solution S;
+    string bgnW,endW,s;
+    cin>>bgnW>>endW;
+    cin.ignore();
+    getline(cin,s);
+    vector<string> wordList = getWordList(s);
+    vector<vector<string>> ladders = S.findLadders(bgnW,endW,wordList);
+    
+    cout<<"[\n";
+    for(int i=0;i<ladders.size();i++){
+        cout<<"[";
+        for(int j=0;j<ladders[i].size();j++){
+            cout<<ladders[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]";
+    return 0;
+}

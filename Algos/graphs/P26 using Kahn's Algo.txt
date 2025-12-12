@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> revGraph(vector<vector<int>> &graph) {
+        int v = graph.size();
+        vector<vector<int>> reversedGraph(v);
+        for (int i = 0; i < v; i++) {
+            for (auto n : graph[i]) {
+                reversedGraph[n].push_back(i); // reverse edge
+            }
+        }
+        return reversedGraph;
+    }
+
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        int v = graph.size();
+        vector<vector<int>> reversedGraph = revGraph(graph);
+
+        vector<int> inDegree(v, 0);
+        for (int i = 0; i < v; i++) {
+            for (auto n : reversedGraph[i]) {
+                inDegree[n]++; // count in-degree in reversed graph
+            }
+        }
+
+        queue<int> q;
+        for (int i = 0; i < v; i++) {
+            if (inDegree[i] == 0)
+                q.push(i);
+        }
+
+        vector<int> safeStates;
+        while (!q.empty()) {
+            int node = q.front(); q.pop();
+            safeStates.push_back(node);
+
+            for (auto n : reversedGraph[node]) {
+                inDegree[n]--;
+                if (inDegree[n] == 0)
+                    q.push(n);
+            }
+        }
+
+        sort(safeStates.begin(), safeStates.end());
+        return safeStates;
+    }
+};
+
+int main() {
+    vector<vector<int>> graph = {{1,2},{2,3},{5},{0},{5},{},{}};
+    Solution s;
+    vector<int> res = s.eventualSafeNodes(graph);
+    cout << "[";
+    for (auto x : res) cout << x << " ";
+    cout << "]";
+    return 0;
+}

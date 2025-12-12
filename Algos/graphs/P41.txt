@@ -1,0 +1,100 @@
+// 4 
+//[[0,1],[1,2],[2,0],[1,3]]
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+    int timer = 0;
+public:
+    void dfs(int src,int parent, vector<vector<int>> &graph, vector<int> &visited, vector<int> &low_time,vector<int>&discovery_time,vector<vector<int>>& bridges){
+        
+        visited[src] = 1;
+        discovery_time[src] = timer;
+        low_time[src] = timer;
+        timer++;
+        for(auto n:graph[src]){
+            
+            if(n==parent) continue;
+            
+            if(!visited[n]){
+                dfs(n,src,graph,visited,low_time,discovery_time,bridges);
+                low_time[src] = min(low_time[src],low_time[n]);
+                if(discovery_time[src]<low_time[n]){
+                    bridges.push_back({src,n});
+                } 
+            }else{
+                low_time[src] = min(low_time[src],discovery_time[n]);
+            }
+        }
+    }
+    vector<vector<int>> criticalConnections(int v, vector<vector<int>>& connections) {
+        vector<vector<int>> graph(v);
+        for(auto &c:connections){
+            graph[c[0]].push_back(c[1]);
+            graph[c[1]].push_back(c[0]);
+        }
+        
+        vector<int> visited(v,0), low_time(v,0), discovery_time(v,0);
+        vector<vector<int>> bridges;
+        for(int i=0;i<v;i++){
+            if(!visited[i]){
+                dfs(i,-1,graph,visited,low_time,discovery_time,bridges);
+            }
+        }
+        return bridges;
+    }
+};
+
+vector<vector<int>> makeEdges(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> mat;
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            }
+        
+        
+        if(j==2){
+            mat.push_back(temp);
+            temp.clear();
+            j = 0;
+        }
+    }
+    return mat;
+}
+
+
+void printMat(vector<vector<int>>& mat){
+    if(mat.empty()) return;
+    
+    int rows = mat.size(),cols = mat[0].size();
+    for(int i=0;i<rows;i++){
+        cout<<"[";
+        for(int j=0;j<cols;j++){
+            cout<<mat[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+}
+
+int main(){
+    int V;
+    cin>>V;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    vector<vector<int>> edges = makeEdges(s,V);
+    Solution S;
+    vector<vector<int>> bridges = S.criticalConnections(V,edges);
+    printMat(bridges);
+    return 0;
+}

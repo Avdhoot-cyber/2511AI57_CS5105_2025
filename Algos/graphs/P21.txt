@@ -1,0 +1,75 @@
+// 4
+// [[0, 1], [1, 2], [2, 0], [2, 3]]
+// 4
+// [[0, 1], [0, 2], [1, 2], [2, 3]
+
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> getGraph(string s,int v){
+    vector<vector<int>> graph(v);
+    vector<int> temp;
+    string num  = "";
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            if(temp.size()==2){
+                int v1 = temp[0],v2 = temp[1];
+                j = 0;
+                graph[v1].push_back(v2);
+                temp.clear();
+            }
+        }
+    }
+    return graph;
+}
+
+
+class Solution{
+public:
+    void dfs(int src,vector<vector<int>> &graph,vector<int> &visited,unordered_map<int,int> &um,bool *cycleExists){
+        
+        if(*cycleExists) return;
+        visited[src] = 1;
+        um[src] = 1;
+        for(auto neighbour:graph[src]){
+            if(!visited[neighbour]){
+                dfs(neighbour,graph,visited,um,cycleExists);
+            }
+            else if(um.find(neighbour)!=um.end()){
+                *cycleExists = true;
+                return;
+            }
+        }
+        um.erase(src);
+    }
+    
+    bool checkCycleinDAG(vector<vector<int>> &graph,int v){
+        unordered_map<int,int> um;
+        bool cycleExists = false;
+        vector<int> visited(v,0);
+        for(int i=0;i<v;i++){
+            if(!visited[i]){
+                dfs(i,graph,visited,um,&cycleExists);
+                if(cycleExists) return true;
+            }
+        }
+        return false;
+    }
+};
+
+int main(){
+    int v;
+    cin>>v;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    string s;
+    getline(cin,s);
+    vector<vector<int>> graph = getGraph(s,v);
+    Solution S;
+    bool ans = S.checkCycleinDAG(graph,v);
+    ans?cout<<"true":cout<<"false";
+    return 0;
+}

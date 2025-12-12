@@ -1,0 +1,150 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> getConnections(string s, int v) {
+    string num = "";
+    vector<vector<int>> conns;
+    vector<int> temp;
+    int j = 0;
+
+    for (char c : s) {
+        if (isdigit(c)) {
+            num += c;
+        } else if (!num.empty()) {
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+
+            if (j == 2) {
+                conns.push_back(temp);
+                temp.clear();
+                j = 0;
+            }
+        }
+    }
+
+    // In case last number not processed (e.g., no trailing non-digit)
+    if (!num.empty()) {
+        temp.push_back(stoi(num));
+        if (temp.size() == 3) conns.push_back(temp);
+    }
+
+    return conns;
+}
+
+
+
+// void dfs(int V,vector<vector<int>> &graph,vector<int> &visited){
+//     visited[V] = 1;
+//     for(int i=0;i<graph[V].size();i++){
+//         if(!visited[graph[V][i]]){
+//             dfs(graph[V][i],graph,visited);
+//         }
+//     }
+// }
+// int nConnectedComps(vector<vector<int>> &graph,int v,vector<int> &visited){
+//     int nComps = 0;
+//     for(int i=0;i<v;i++){
+//         if(!visited[i]){
+//             dfs(i,graph,visited);
+//             nComps++;
+//         }
+//     }
+//     return nComps;
+// }
+
+vector<vector<int>> makeAdjList(int v,vector<vector<int>> &connections){
+    vector<vector<int>> adjList(v);
+    for(int i=0;i<connections.size();i++){
+        int v1 = connections[i][0],v2 = connections[i][1];
+        adjList[v1].push_back(v2);
+        adjList[v2].push_back(v1);
+    }
+    return adjList;
+}
+
+class DisjointSet{
+    vector<int> rank,size,parent;
+    int extra_edge;
+    public:
+    DisjointSet(int n){
+        rank.resize(n,0);
+        parent.resize(n);
+        for(int i=0;i<n;i++){
+            parent[i] = i;
+        }
+        size.resize(n,1);
+        extra_edge = 0;
+    }
+    
+    int findUPar(int v){
+        if(parent[v]==v) return v;
+        
+        return parent[v] = findUPar(parent[v]);
+    }
+    
+    void UnionbyRank(int a,int b){
+        int p_a = findUPar(a),p_b = findUPar(b);
+        
+        if(p_a==p_b){
+            extra_edge++;
+            return;
+        }
+        
+        if(rank[p_a]==rank[p_b]){
+            parent[p_b] = p_a;
+            rank[p_a]++;
+        }else if(rank[p_a]>rank[p_b]){
+            parent[p_b] = p_a;
+        }else{
+            parent[p_a] = p_b;
+        }
+    }
+    int giveExtraEdges(){
+        return extra_edge;
+    }
+    
+    int giveNComps(int v){
+        int nComps=0;
+        for(int i=0;i<v;i++){
+            if(parent[i]==i){
+                nComps++;
+            }
+        }
+        return nComps;
+    }
+     
+};
+
+class Solution {
+public:
+    int makeConnected(int n, vector<vector<int>>& connections) {
+        DisjointSet dsu(n);
+        for(int i=0;i<connections.size();i++){
+            dsu.UnionbyRank(connections[i][0],connections[i][1]);
+        }
+        vector<vector<int>> adjList = makeAdjList(n,connections);
+        vector<int> visited(n,0);
+        // int nComps = nConnectedComps(adjList,n,visited);
+        int nComps = dsu.giveNComps(n);
+        int extra_edges = dsu.giveExtraEdges();
+        if(extra_edges>=nComps-1){
+            return nComps-1;
+        }else{
+            return -1;
+        }
+    }
+};
+
+int main(){
+    Solution S;
+    int n;
+    cin>>n;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    auto conns = getConnections(s,n);
+    int ans = S.makeConnected(n,conns);
+    cout<<ans;
+    return 0;
+}

@@ -1,0 +1,73 @@
+// 3 30
+// {2,5,7}
+
+// 7 66175
+// {3, 4, 65}
+
+
+
+
+#include<bits/stdc++.h>
+using namespace std;
+
+const long long C = 100000; 
+
+
+class Solution {
+  public:
+    int minimumMultiplications(vector<int>& arr, int start, int end) {
+        // code here
+        vector<int> visited(C);
+        queue<pair<int,int>> q;
+        q.push({start,0});
+        visited[start] = 1;
+        while(!q.empty()){
+            auto [val,opns] = q.front(); q.pop();
+            if(val==end) return opns;
+            
+            for(auto num:arr){
+                int V = (num*val)%C;
+                if(!visited[V]){
+                    q.push({V,opns+1}); 
+                    visited[V] = 1;
+                }
+            }
+        }
+        
+        return -1;
+    }
+};
+
+vector<int> getArr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+void printVec(vector<int> &v) {
+    cout << "[";
+    for (auto x : v) cout << x << " ";
+    cout << "]";
+}
+
+int main(){
+    Solution S;
+    int start,end;
+    cin>>start>>end;
+    cin.ignore();
+    vector<int> arr = getArr();
+    int ans = S.minimumMultiplications(arr,start,end);
+    cout<<ans;
+    return 0;
+}

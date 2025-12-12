@@ -1,0 +1,95 @@
+//[["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        int rows = board.size(),cols = board[0].size();
+        queue<pair<int,int>> q;
+        
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                if(i==0 || i==rows-1){
+                    if(board[i][j]=='O'){
+                        q.push({i,j});
+                        board[i][j] = 'V';
+                    }
+                }else{
+                    if(j==0 || j==cols-1){
+                        if(board[i][j]=='O'){
+                            q.push({i,j});
+                            board[i][j] = 'V';
+                        }
+                    }
+                }
+            }
+        }
+        
+        int dx[] = {1,0,-1,0},dy[] = {0,-1,0,1};
+        while(!q.empty()){
+            auto [x,y] = q.front(); q.pop();
+            for(int k=0;k<4;k++){
+                int i = x+dx[k],j = y+dy[k];
+                if(i>=0 && i<rows && j>=0 && j<cols){
+                    if(board[i][j]=='O'){
+                        q.push({i,j});
+                        board[i][j] = 'V';
+                    }
+                }
+            }
+        }
+        
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                if(board[i][j]=='O'){
+                    board[i][j] = 'X';
+                }
+            }
+        }
+        
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                if(board[i][j]=='V'){
+                    board[i][j] = 'O';
+                }
+            }
+        }
+    }
+};
+
+vector<vector<char>> getBoard(){
+    vector<vector<char>> board;
+    string s;
+    getline(cin,s);
+    vector<char> temp;
+    for(char c:s){
+        if(c==']'  && !temp.empty()){
+            board.push_back(temp);
+            temp.clear();
+        }
+        if(c=='X' || c=='O'){
+            temp.push_back(c);
+        }
+    }
+    return board;
+}
+
+void printBoard(vector<vector<char>>& board){
+    int rows = board.size(),cols = board[0].size();
+    for(int i=0;i<rows;i++){
+        cout<<"[";
+        for(int j=0;j<cols;j++){
+            cout<<board[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+}
+
+int main(){
+    vector<vector<char>> board = getBoard();
+    Solution S;
+    S.solve(board);
+    printBoard(board);
+    return 0;
+}

@@ -1,0 +1,72 @@
+// hit cog
+// ["hot","dot","dog","lot","log","cog"]
+
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> us(wordList.begin(),wordList.end());
+        queue<pair<string,int>> q;
+        
+        if(us.find(endWord)==us.end()){
+            return 0;
+        }
+        
+        q.push({beginWord,1});
+        vector<char> alphaList = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+        
+        while(!q.empty()){
+            auto [s,d] = q.front(); q.pop();
+            if(s==endWord) return d;
+            for(int i=0;i<s.length();i++){
+                char orgChar = s[i];
+                for(char c: alphaList){
+                    if(c!= orgChar){
+                        s[i] = c;
+                        if(us.find(s)!=us.end()){
+                            us.erase(s);
+                            q.push({s,d+1});
+                        }
+                    }
+                }
+                s[i] = orgChar;
+            }
+        }
+        return 0;
+    }
+};
+
+vector<string> getWordList(string s){
+    vector<string> wordList;
+    string num = "";
+    for(int i=0;i<s.length();i++){
+        if(s[i]=='"'){
+            i++;
+            while(s[i]!='"'){
+                if(isalpha(s[i])){
+                    num+=s[i];
+                }else{
+                    num = "";
+                }
+                i++;
+            }
+            wordList.push_back(num);
+            num = "";
+        }
+    }
+    return wordList;
+}
+
+int main(){
+    Solution S;
+    string bgnW,endW,s;
+    cin>>bgnW>>endW;
+    cin.ignore();
+    getline(cin,s);
+    vector<string> wordList = getWordList(s);
+    int shortestRoute = S.ladderLength(bgnW,endW,wordList);
+    cout<<shortestRoute;
+    return 0;
+}

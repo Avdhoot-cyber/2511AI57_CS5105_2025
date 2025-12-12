@@ -1,0 +1,98 @@
+// Input: grid - [[1,2,3],[0,2],[0,1,3],[0,2]]
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    void dfs(vector<vector<int>> &graph,int v,vector<int> &visited,vector<int> &color,int COLOR,bool* cond){
+        if(!*cond){
+            return;
+        }
+        
+        visited[v] = 1;
+        color[v] = COLOR;
+        for(int i=0;i<graph[v].size();i++){
+            if(!visited[graph[v][i]]){
+                dfs(graph,graph[v][i],visited,color,!COLOR,cond);
+            }
+            else{
+                if(color[graph[v][i]]==COLOR){
+                    *cond = false;
+                }
+            }
+        }
+    }
+    
+    bool isBipartite(vector<vector<int>>& graph) {
+        int v = graph.size();
+        int COLOR = 0;
+        bool cond = true;
+        vector<int> color(v,-1),visited(v,0);
+        for(int i=0;i<v;i++){
+            if(!visited[i]){
+                dfs(graph,i,visited,color,COLOR,&cond);
+            }
+        }
+        return cond;
+    }
+};
+
+vector<vector<int>> getAdjList(){
+    string s,num;
+    getline(cin,s);
+    int n = s.length();
+    int v=0;
+    for(char c:s){
+        if(c=='['){
+            v++;
+        }
+    }
+    v--;
+    vector<vector<int>> adjList(v);
+    int index = 0;
+    for(int i=0;i<n;i++){
+        if(i==0){
+            continue;
+        }
+        num = "";
+        if(s[i]=='['){
+            while(s[i]!=']'){
+                if(isdigit(s[i])){
+                    num+=s[i];
+                }else if(!num.empty()){
+                    adjList[index].push_back(stoi(num));
+                    num = "";
+                }
+                i++;
+            }
+            if(!num.empty()){
+                adjList[index].push_back(stoi(num));
+            }
+            
+            index++;
+        }
+    }
+    return adjList;
+};
+
+void printAdjList(vector<vector<int>> &adjList){
+    int v = adjList.size();
+    cout<<"[\n";
+    for(int i=0;i<v;i++){
+        cout<<"[";
+        for(int j=0;j<adjList[i].size();j++){
+            cout<<adjList[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]";
+}
+
+int main(){
+    Solution S;
+    auto adjList = getAdjList();
+    printAdjList(adjList);
+    bool cond = S.isBipartite(adjList);
+    cond?cout<<"true":cout<<"false";
+    return 0;
+}

@@ -1,0 +1,120 @@
+//[[2, 3], [0], [1], [4], []]
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> revGraph(vector<vector<int>> &adj);
+
+class Solution {
+public:
+    void dfs(int src,vector<vector<int>> &graph,vector<int> &visited,stack<int> &s){
+        visited[src] = 1;
+        for(auto &n:graph[src]){
+            if(!visited[n]){
+                dfs(n,graph,visited,s);
+            }
+        }
+        s.push(src);
+    }
+    
+    void oldDfs(int src,vector<vector<int>> &graph,vector<int> &visited){
+        visited[src] = 1;
+        for(auto &n:graph[src]){
+            if(!visited[n]){
+                oldDfs(n,graph,visited);
+            }
+        }
+    }
+    
+    int kosaraju(vector<vector<int>> &graph) {
+        int v = graph.size();
+        vector<int> visited(v,0);
+        stack<int> s;
+        for(int i=0;i<v;i++){
+            if(!visited[i]){
+                dfs(i,graph,visited,s);
+            }
+        }
+        
+        vector<vector<int>> revAdj = revGraph(graph);
+        fill(visited.begin(),visited.end(),0);
+        int comps = 0;
+        while(!s.empty()){
+            int V = s.top(); s.pop();
+            if(!visited[V]){
+                oldDfs(V,revAdj,visited);
+                comps++;
+            }
+            
+        }
+        return comps;
+    }
+};
+
+vector<vector<int>> revGraph(vector<vector<int>> &adj){
+    int v = adj.size();
+    vector<vector<int>> revAdj(v);
+    
+    for(int i=0;i<v;i++){
+        for(auto n:adj[i]){
+            revAdj[n].push_back(i);
+        }
+    }
+    
+    return revAdj;
+}
+
+
+vector<vector<int>> makeAdjList(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> adjList(v);
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            if(j==2){
+                int v1 = temp[0],v2 = temp[1];
+                temp.clear();
+                adjList[v1].push_back(v2);
+                adjList[v2].push_back(v1);
+                j=0;
+            }
+        }
+    }
+    return adjList;
+}
+
+
+
+void printMat(vector<vector<int>>& mat){
+    if(mat.empty()) return;
+    
+    int rows = mat.size(),cols = mat[0].size();
+    for(int i=0;i<rows;i++){
+        cout<<"[";
+        for(int j=0;j<cols;j++){
+            cout<<mat[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+}
+
+int main(){
+    int V;
+    cin>>V;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    vector<vector<int>> adj = makeAdjList(s,V);
+    Solution S;
+    int comps = S.kosaraju(adj);
+    cout<<comps;
+    return 0;
+}

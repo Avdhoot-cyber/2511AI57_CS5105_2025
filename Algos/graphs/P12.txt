@@ -1,0 +1,76 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> getAdjList(string s,int v){
+    vector<vector<int>> adjList;
+    int n = s.length();
+    for(int i=0;i<n;i++){
+        if(i==0) continue;
+        if(s[i]=='['){
+            vector<int> temp;
+            string num="";
+            while(s[i]!=']'){
+                if(isdigit(s[i])){
+                    num+=s[i];
+                }else if(!num.empty()){
+                    temp.push_back(stoi(num));
+                    num = "";                }
+                i++;
+            }
+            if(!num.empty()){
+                temp.push_back(stoi(num));
+            }
+            adjList.push_back(temp);
+        }
+    }
+    return adjList;
+}
+
+void printAdjList(vector<vector<int>> &adjList){
+    int v = adjList.size();
+    cout<<"[\n";
+    for(int i=0;i<v;i++){
+        cout<<"[";
+        for(int j=0;j<adjList[i].size();j++){
+            cout<<adjList[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]\n";
+}
+
+class Solution{
+    public:
+    void dfs(vector<vector<int>> &graph,int v,vector<int> &visited,vector<int> &order){
+        visited[v] = 1;
+        order.push_back(v);
+        for(int i=0;i<graph[v].size();i++){
+            if(!visited[graph[v][i]]){
+                dfs(graph,graph[v][i],visited,order);
+            }
+        }
+    }
+};
+
+void printVec(vector<int> &v){
+    cout<<"[";
+    for(int i=0;i<v.size();i++){
+        cout<<v[i]<<" ";
+    }
+    cout<<"]";
+}
+int main(){
+    int src,v;
+    cin>>src>>v;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    vector<vector<int>> adjList = getAdjList(s,v);
+    printAdjList(adjList);
+    Solution S;
+    vector<int> visited(v,0),order;
+    S.dfs(adjList,src,visited,order);
+    printVec(order);
+    
+    return 0;
+}

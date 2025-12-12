@@ -1,0 +1,88 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct cmp{
+    bool operator()(tuple<int,int,int> a,tuple<int,int,int> b){
+        return get<2>(a)>get<2>(b);
+    }
+};
+
+class Solution {
+public:
+    int minimumEffortPath(vector<vector<int>>& heights) {
+        
+        int rows = heights.size(),cols = heights[0].size();
+        
+        vector<vector<int>> effort(rows,vector<int>(cols,INT_MAX));
+        priority_queue<tuple<int,int,int>, vector<tuple<int,int,int>>, cmp> pq;
+        pq.push(tuple{0,0,0});
+        effort[0][0] = 0;
+        int dx[] = {1,0,-1,0},dy[] = {0,-1,0,1};
+        
+        while(!pq.empty()){
+            auto [x,y,d] = pq.top();
+            pq.pop();
+            if(x==rows-1 && y==cols-1) return d;
+            if (d > effort[x][y]) continue; 
+            for(int k=0;k<4;k++){
+                int i = x+dx[k],j = y+dy[k];
+                
+                if(i>=0 && i<rows && j>=0 && j<cols){
+                    
+                    int neweffort = max(d,abs(heights[x][y] - heights[i][j]));
+                    if(neweffort<effort[i][j]){
+                        effort[i][j] = neweffort;
+                        pq.push(tuple{i,j,neweffort});
+                    }
+                    
+                }
+            }
+            
+        }
+        return -1;
+    }
+};
+
+vector<vector<int>> getGrid(){
+    string s,num="";
+    getline(cin,s);
+    int rows = 0,cols = 0;
+    for(char c:s){
+        if(c=='['){
+            rows++;
+        }
+    }
+    rows--;
+    vector<int> v;
+    for(char c:s){
+        if(isdigit(c)){
+            num+=c;
+        }else if(!num.empty()){
+            v.push_back(stoi(num));
+            num = "";
+        }
+    }
+    
+    if(!num.empty()){
+        v.push_back(stoi(num));
+    }
+    cols = v.size()/rows;
+    int index = 0;
+    vector<vector<int>> grid(rows,vector<int>(cols));
+    for(int i=0;i<rows;i++){
+        for(int j=0;j<cols;j++){
+            grid[i][j] = v[index++];
+        }
+    }
+    return grid;
+};
+
+
+int main(){
+    vector<vector<int>> grid = getGrid();
+    
+    Solution S;
+    int mineffort = S.minimumEffortPath(grid);
+    cout<<mineffort;
+    return 0;
+}

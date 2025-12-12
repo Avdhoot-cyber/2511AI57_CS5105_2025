@@ -1,0 +1,86 @@
+// Input: V = 5, edges[][] = [[0, 1], [0, 2], [0, 3], [1, 2], [3, 4]]
+// 4 [[0, 1], [1, 2], [2, 3]]
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution{
+    public:
+    void dfs(int src,int parent,vector<vector<int>> &graph,vector<int> &visited,bool *cycleExists){
+        visited[src] = 1;
+        for(int neighbour:graph[src]){
+            if(!visited[neighbour]){
+                dfs(neighbour,src,graph,visited,cycleExists);
+            }else if(neighbour!=parent){
+                *cycleExists = true;
+                return;
+            }
+        }
+    }
+    
+    bool detectCycleviaDfs(vector<vector<int>> &adjList, int V){
+        vector<int> visited(V,0);
+        bool cond = false;
+        for(int i=0;i<V;i++){
+            if(!visited[i]){
+                dfs(i,-1,adjList,visited,&cond);
+            }
+            
+            if(cond) return true;
+        }
+        return false;
+    }
+};
+
+vector<vector<int>> makeAdjList(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> adjList(v);
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            if(j==2){
+                int v1 = temp[0],v2 = temp[1];
+                temp.clear();
+                adjList[v1].push_back(v2);
+                adjList[v2].push_back(v1);
+                j=0;
+            }
+        }
+    }
+    return adjList;
+}
+
+void printAdjList(vector<vector<int>> &adjList){
+    int v = adjList.size();
+    cout<<"[\n";
+    for(int i=0;i<v;i++){
+        cout<<"[";
+        for(int j=0;j<adjList[i].size();j++){
+            cout<<adjList[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]\n";
+}
+
+int main(){
+    int v;
+    cin>>v;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    vector<vector<int>> adjList = makeAdjList(s,v);
+    printAdjList(adjList);
+    Solution S;
+    bool ans = S.detectCycleviaDfs(adjList,v);
+    ans?cout<<"true":cout<<"false";
+    return 0;
+}

@@ -1,0 +1,115 @@
+//5, 
+// { {0, 1, 2}, {0, 2, 1}, {1, 2, 1}, {2, 3, 2}, {3, 4, 1}, {4, 2, 2}}
+
+#include<bits/stdc++.h>
+using namespace std;
+
+class disjointUnion{
+    vector<int> parent,rank;
+    public:
+    
+    disjointUnion(int n){
+        parent.resize(n,0);
+        rank.resize(n,0);
+        
+        for(int i=0;i<n;i++){
+            parent[i] = i;
+        }
+    }
+    
+    int findUPar(int v){
+        if(parent[v]==v){
+            return v;
+        }
+        return parent[v] = findUPar(parent[v]);
+    }
+    
+    bool unionbyRank(int a,int b){
+        int p_a = findUPar(a),p_b = findUPar(b);
+        
+        if(p_a==p_b){
+            return false;
+        }
+        
+        if(rank[p_a]==rank[p_b]){
+            rank[p_a]++;
+            parent[p_b] = p_a;
+            findUPar(b);
+        }else if(rank[p_a]>rank[p_b]){
+            parent[p_b] = p_a;
+            findUPar(b);
+        }else{
+            parent[p_a] = p_b;
+            findUPar(a);
+        }
+        return true;
+    }
+    
+    vector<int> giveParent(){
+        return parent;
+    }
+};
+
+struct cmp{ 
+    bool operator()(vector<int> a,vector<int> b){ 
+        return a[2]<b[2]; 
+    } 
+};
+
+class Solution {
+  public:
+    int kruskalsMST(int V, vector<vector<int>> &edges) {
+        disjointUnion du(V);
+        
+        sort(edges.begin(),edges.end(),cmp());
+        int spanSum = 0;
+        for(auto &edge:edges){
+            int v_s = edge[0], v_d = edge[1], w = edge[2];
+            if(du.unionbyRank(v_s,v_d)){
+                spanSum+=w;
+            }
+        }
+        return spanSum;
+        
+    }
+};
+
+vector<vector<int>> makeWeightedEdges(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> mat;
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            }
+        
+        
+        if(j==3){
+            mat.push_back(temp);
+            temp.clear();
+            j = 0;
+        }
+    }
+    return mat;
+}
+
+int main(){
+    int V;
+    cin>>V;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    vector<vector<int>> edges = makeWeightedEdges(s,V);
+    Solution S;
+    int spanSum = S.kruskalsMST(V,edges);
+    cout<<spanSum;
+    return 0;
+}

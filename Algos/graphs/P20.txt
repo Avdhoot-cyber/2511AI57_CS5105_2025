@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        queue<pair<int,int>> q;
+        int dx[] = {1,0,-1,0},dy[] = {0,-1,0,1};
+        int rows = grid.size(),cols = grid[0].size(),nIslands = 0;
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                if(grid[i][j]=='1'){
+                    q.push({i,j});
+                    grid[i][j] = '2';
+                    while(!q.empty()){
+                        auto [x,y] = q.front(); q.pop();
+                        for(int k=0;k<4;k++){
+                            int ni = x+dx[k],nj = y+dy[k];
+                            if(ni>=0 && ni<rows && nj>=0 && nj<cols && grid[ni][nj]=='1'){
+                                q.push({ni,nj});
+                                grid[ni][nj] = '2';
+                            }
+                        }
+                    }
+                    nIslands++;
+                }
+                
+            }
+        }
+        return nIslands;
+    }
+};
+
+vector<vector<char>> getGrid(){
+    vector<vector<char>> grid;
+    string s;
+    getline(cin,s);
+    vector<char> temp;
+    for(char c:s){
+        if(c==']'  && !temp.empty()){
+            grid.push_back(temp);
+            temp.clear();
+        }
+        if(c=='1' || c=='0'){
+            temp.push_back(c);
+        }
+    }
+    return grid;
+}
+
+
+int main(){
+    vector<vector<char>> grid = getGrid();
+    Solution S;
+    int nIslands = S.numIslands(grid);
+    cout<<nIslands;
+    return 0;
+}

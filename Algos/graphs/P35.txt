@@ -1,0 +1,104 @@
+// 4 4
+// [[0,1,3],[1,2,1],[1,3,4],[2,3,1]]
+
+//5 2
+//[[0,1,2],[0,4,8],[1,2,3],[1,4,2],[2,3,1],[3,4,1]]
+
+
+#include<bits/stdc++.h>
+using namespace std;
+
+const int C = 1e8;
+
+class Solution {
+public:
+    int findTheCity(int n, vector<vector<int>>& edges, int distanceThreshold) {
+        vector<vector<int>> distMat(n,vector<int>(n,C));
+        
+        for(auto &edge:edges){
+            int v1 = edge[0], v2 = edge[1], w = edge[2];
+            
+            distMat[v1][v2] = distMat[v2][v1] = w;
+        }
+        
+        for(int i=0;i<n;i++){
+            distMat[i][i] = 0;
+        }
+        
+        for(int k=0;k<n;k++){
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    if(distMat[i][k]<C && distMat[k][j]<C){
+                        distMat[i][j] = min(distMat[i][j],distMat[i][k]+distMat[k][j]);
+                    }
+                }   
+            }
+        }
+        int minCount = n,minCity;
+        for(int i=0;i<n;i++){
+            int count=0;
+            for(int j=0;j<n;j++){
+                if(i!=j && distMat[i][j]<=distanceThreshold){
+                    count++;
+                }
+            }
+            if(count<=minCount){
+                minCount = count;
+                minCity = i;
+            }
+        }
+        
+        return minCity;
+    }
+}; 
+
+vector<vector<int>> makeWeightedEdges(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> mat;
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            }
+        
+        
+        if(j==3){
+            mat.push_back(temp);
+            temp.clear();
+            j = 0;
+        }
+    }
+    return mat;
+}
+
+void printMat(vector<vector<int>>& mat){
+    int rows = mat.size(),cols = mat[0].size();
+    for(int i=0;i<rows;i++){
+        cout<<"[";
+        for(int j=0;j<cols;j++){
+            cout<<mat[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+}
+
+int main(){
+    Solution S;
+    int n,thres;
+    cin>>n>>thres;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    auto edges = makeWeightedEdges(s,n);
+    int maxCount = S.findTheCity(n,edges,thres);
+    cout<<maxCount;
+    return 0;
+}

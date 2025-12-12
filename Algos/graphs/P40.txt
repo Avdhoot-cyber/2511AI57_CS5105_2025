@@ -1,0 +1,159 @@
+4 5 4 A = {{1,1},{0,1},{3,3},{3,4}}
+
+#includebitsstdc++.h
+using namespace std;
+
+
+
+class DisjointSet{
+public
+    vectorint parent,rank,size;
+    DisjointSet(int n){
+        parent.resize(n);
+        rank.resize(n,0);
+        size.resize(n,1);
+        for(int i=0;in;i++){
+            parent[i] = i;
+        }
+        
+    }
+    
+    int findUPar(int a){
+        if(parent[a]==a){
+            return a;
+        }
+        
+        return parent[a] = findUPar(parent[a]);
+    }
+    
+    void UnionbyRank(int a,int b){
+        int p_a = findUPar(a),p_b = findUPar(b);
+        
+        if(p_a==p_b) return;
+        
+        if(rank[p_a]==rank[p_b]){
+            rank[p_a]++;
+            parent[p_b] = p_a;
+        }else if(rank[p_a]rank[p_b]){
+            parent[p_b] = p_a;
+        }else{
+            parent[p_a] = p_b;
+        }
+    }
+    
+    void UnionbySize(int a,int b){
+        int p_a = findUPar(a),p_b = findUPar(b);
+        
+        if(p_a==p_b) return;
+        if(size[p_a]==size[p_b]){
+            size[p_a]+=size[p_b];
+            parent[p_b] = p_a;
+        }else if(size[p_a]size[p_b]){
+            size[p_a]+=size[p_b];
+            parent[p_b] = p_a;
+        }else{
+            size[p_b]+=size[p_a];
+            parent[p_a] = p_b;
+        }
+    }   
+};
+
+[[1,0],[0,1]]
+
+class Solution {
+public
+    
+    int largestIsland(vectorvectorint& grid) {
+        int n = grid.size();
+        DisjointSet dsu(nn);
+        int dx[] = {1,0,-1,0},dy[] = {0,-1,0,1};
+        int maxSize = 1;
+        for(int i=0;in;i++){
+            for(int j=0;jn;j++){
+                if(grid[i][j]==1){
+                    int src_p = dsu.findUPar(in+j);
+                    for(int k=0;k4;k++){
+                        int x = i+dx[k],y = j+dy[k];
+                        if(x=0 && xn && y=0 && yn && grid[x][y]==1 && dsu.findUPar(xn+y)!=src_p){
+                            dsu.UnionbySize(in+j,xn+y);
+                        }
+                    }
+                }
+            }
+        }
+        
+        for(int i=0;inn;i++){
+            maxSize = max(maxSize,dsu.size[i]);
+        }
+        
+        for(int i=0;in;i++){
+            for(int j=0;jn;j++){
+                if(grid[i][j]==0){
+                    setint p;
+                    int src_p = dsu.findUPar(in+j);
+                    for(int k=0;k4;k++){
+                    int x = i+dx[k],y = j+dy[k];
+                        if(x=0 && xn && y=0 && yn && grid[x][y]==1){
+                            p.insert(dsu.findUPar(xn+y));
+                        }
+                    }
+                    int total = 1;
+                    for(auto iterp){
+                        total+=dsu.size[iter];
+                    }
+                    maxSize = max(maxSize,total);
+                }
+            }
+        }
+        return maxSize;
+    }
+};
+
+vectorvectorint makeGrid(string s){
+    int rows = 0,cols = 0;
+        for(char cs){
+            if(c=='['){
+                rows++;
+            }
+        }
+        rows--;
+        cols = rows;
+        vectorvectorint grid(rows);
+        int i=0,j=0;
+        for(char cs){
+            if(c=='1'  c=='0'){
+                grid[i].push_back(c-'0');
+                j++;
+            }
+            if(j=cols){
+                j = 0;
+                i++;
+            }
+        }
+    return grid;
+}
+
+void printMat(vectorvectorint& mat){
+    if(mat.empty()) return;
+    
+    int rows = mat.size(),cols = mat[0].size();
+    for(int i=0;irows;i++){
+        cout[;
+        for(int j=0;jcols;j++){
+            coutmat[i][j] ;
+        }
+        cout]n;
+    }
+}
+
+int main(){
+    string s;
+    getline(cin,s);
+    vectorvectorint grid = makeGrid(s);
+    Solution S;
+    int ans = S.largestIsland(grid);
+    printMat(grid);
+    coutans;
+    return 0;
+}
+

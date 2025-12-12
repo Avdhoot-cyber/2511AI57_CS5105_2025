@@ -1,0 +1,94 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {
+        int rows = image.size(),cols = image[0].size();
+        int startingColor = image[sr][sc];
+        vector<vector<int>> visited(rows,vector<int>(cols,0)), newImage(rows,vector<int>(cols,0));
+        
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                newImage[i][j] = image[i][j];
+            }
+        }
+        
+        queue<pair<int,int>> q;
+        q.push(pair{sr,sc});
+        visited[sr][sc] = 1;
+        newImage[sr][sc] = color;
+        int dx[] = {1,0,-1,0},dy[] = {0,-1,0,1};
+        while(!q.empty()){
+            auto [x,y] = q.front(); q.pop();
+            for(int k=0;k<4;k++){
+                int i = x+dx[k],j = y+dy[k];
+                
+                if(i>=0 && i<rows && j>=0 && j<cols && image[i][j]==startingColor && !visited[i][j]){
+                    q.push(pair{i,j});
+                    visited[i][j] = 1;
+                    newImage[i][j] = color;
+                }
+            }
+            
+        }
+        return newImage;
+    }
+};
+
+vector<vector<int>> getGrid(){
+    string s,num="";
+    getline(cin,s);
+    int rows = 0,cols = 0;
+    for(char c:s){
+        if(c=='['){
+            rows++;
+        }
+    }
+    rows--;
+    vector<int> v;
+    for(char c:s){
+        if(isdigit(c)){
+            num+=c;
+        }else if(!num.empty()){
+            v.push_back(stoi(num));
+            num = "";
+        }
+    }
+    
+    if(!num.empty()){
+        v.push_back(stoi(num));
+    }
+    cols = v.size()/rows;
+    int index = 0;
+    vector<vector<int>> grid(rows,vector<int>(cols));
+    for(int i=0;i<rows;i++){
+        for(int j=0;j<cols;j++){
+            grid[i][j] = v[index++];
+        }
+    }
+    return grid;
+};
+
+void printImg(vector<vector<int>> &mat){
+    int rows = mat.size(),cols = mat[0].size();
+    cout<<"[\n";
+    for(int i=0;i<rows;i++){
+        cout<<"[";
+        for(int j=0;j<cols;j++){
+            cout<<mat[i][j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"]";
+}
+
+int main(){
+    Solution S;
+    vector<vector<int>> img = getGrid();
+    int sr,sc,color;
+    cin>>sr>>sc>>color;
+    vector<vector<int>> newImg = S.floodFill(img,sr,sc,color);
+    printImg(newImg);
+    return 0;
+}

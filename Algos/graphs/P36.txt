@@ -1,0 +1,74 @@
+// Input: V = 3, E = 3, Edges = [[0, 1, 5], [1, 2, 3], [0, 2, 1]]
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+  public:
+    int spanningTree(int v, vector<vector<int>>& edges) {
+        vector<int> visited(v,0);
+        vector<vector<pair<int,int>>> graph(v);
+        for(auto &edge:edges){
+            graph[edge[0]].push_back({edge[1],edge[2]});
+            graph[edge[1]].push_back({edge[0],edge[2]});
+        }
+        
+        priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
+        int spanSum = 0;
+        pq.push({0,0});
+        while(!pq.empty()){
+            auto [w,v] = pq.top(); pq.pop();
+            
+            if(visited[v]) continue;
+            
+            visited[v] = 1;
+            spanSum+=w;
+            for(auto iter:graph[v]){
+                int n = iter.first, weight = iter.second;
+                if(!visited[n]){
+                    pq.push({weight,n});
+                }
+            }
+        }
+        return spanSum;
+    }
+};
+
+vector<vector<int>> makeWeightedEdges(string s,int v){
+    int j=0;
+    vector<int> temp;
+    string num = "";
+    vector<vector<int>> mat;
+    for(int i=0;i<s.length();i++){
+        if(i==0){
+            continue;
+        }
+        if(isdigit(s[i]) || s[i]=='-'){
+            num+=s[i];
+        }else if(!num.empty()){
+            temp.push_back(stoi(num));
+            num = "";
+            j++;
+            }
+        
+        
+        if(j==3){
+            mat.push_back(temp);
+            temp.clear();
+            j = 0;
+        }
+    }
+    return mat;
+}
+
+int main(){
+    Solution S;
+    int V;
+    cin>>V;
+    cin.ignore();
+    string s;
+    getline(cin,s);
+    auto edges = makeWeightedEdges(s,V);
+    int spanWeight = S.spanningTree(V,edges);
+    cout<<spanWeight;
+    return 0;
+}
