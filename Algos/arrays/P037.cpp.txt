@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+pair<vector<int>,int> mergeandCount(vector<int>&nums1, vector<int>&nums2){
+    int n1 = nums1.size(),n2 = nums2.size(), i=0,j=0,k=0,inv=0;
+    vector<int> merged(n1+n2);
+    while(i<n1 && j<n2){
+        if(nums1[i]<=nums2[j]){
+            merged[k++] = nums1[i++];
+        }else{
+            merged[k++] = nums2[j++];
+            inv+=n1-i;
+        }
+    }
+    while(i<n1){
+        merged[k++] = nums1[i++];
+    }
+    while(j<n2){
+        merged[k++] = nums2[j++];
+    }
+    
+    return {merged,inv};
+}
+
+pair<vector<int>,int> mergeSort(vector<int>& nums,int left,int right) {
+    if(left<=right){
+        if(left==right){
+            return {{nums[left]},0};
+        }
+        int mid = (left+right)/2;
+        auto [leftSort,linv] = mergeSort(nums,left,mid);
+        auto [rightSort,rinv] = mergeSort(nums,mid+1,right);
+        
+        auto [merged,inv] = mergeandCount(leftSort,rightSort);
+        return {merged,inv+linv+rinv};
+    }
+    return {{},0};
+}
+
+
+void printarr(vector<int> &a){
+    cout<<"[";
+    for(int i=0;i<a.size();i++){
+        cout<<a[i]<<", ";
+    }
+    cout<<"]";
+}
+
+vector<int> getarr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+
+int main(){
+    vector<int> nums = getarr();
+    auto [_,inversions] = mergeSort(nums,0,nums.size()-1);
+    cout<<inversions;
+    return 0;
+}

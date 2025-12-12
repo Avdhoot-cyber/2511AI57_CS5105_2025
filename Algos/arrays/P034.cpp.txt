@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+using namespace std;
+    
+vector<vector<int>> fourSum(vector<int>& nums,int k) {
+    vector<vector<int>> quads;
+    sort(nums.begin(),nums.end());
+    int n = nums.size(),left,right;
+    long long int target,num1,num2,sum;
+    for(int i=0;i<n;i++){
+        if(i>0 && nums[i]==nums[i-1]) continue;
+        for(int j=i+1;j<n;j++){
+            if(j>i+1 && nums[j]==nums[j-1]) continue;
+            num1 = nums[i],num2 = nums[j];
+            target = k-(num1+num2);
+            left = j+1;
+            right = n-1;
+            while(left<right){
+                sum = nums[left] + nums[right];
+                
+                if(sum==target){
+                    quads.push_back({nums[i],nums[j],nums[left],nums[right]});
+                    left++;
+                    right--;
+                    while(left<right && nums[left]==nums[left-1]) left++;
+                    while(left<right && nums[right]==nums[right+1]) right--;
+                }else if(sum>target){
+                    right--;
+                }else{
+                    left++;
+                }
+            }
+        }
+    }
+    return quads;
+}
+
+void printarr(vector<int> &a){
+    cout<<"[";
+    for(int i=0;i<a.size();i++){
+        cout<<a[i]<<", ";
+    }
+    cout<<"]";
+}
+
+void printMat(vector<vector<int>> &mat){
+    int m = mat.size(),n = mat[0].size();
+    
+    cout<<"[";
+    for(int i=0;i<m;i++){
+        cout<<"[";
+        for(int j=0;j<n;j++){
+            cout<<mat[i][j]<<" ";
+        }
+        if(i==m-1) cout<<"]"; 
+        else cout<<"]"<<endl;
+    }
+    cout<<"]";
+}
+
+vector<int> getarr(){
+    string s,num="";
+    getline(cin,s);
+    vector<int> arr;
+    for(char c:s){
+        if(isdigit(c) || c=='-'){
+            num+=c;
+        }else if(!num.empty()){
+            arr.push_back(stoi(num));
+            num="";
+        }
+    }
+    if(!num.empty()){
+        arr.push_back(stoi(num));
+    }
+    return arr;
+}
+
+int main(){
+    vector<int> nums = getarr();
+    int target;
+    cin>>target;
+    vector<vector<int>> quads = fourSum(nums,target);
+    printMat(quads);
+    return 0;
+}

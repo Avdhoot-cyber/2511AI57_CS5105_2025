@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> threeSum(vector<int>& nums) {
+        vector<vector<int>> triplets;
+        int n = nums.size(),target = 0;
+        sort(nums.begin(),nums.end());
+        int left = 0,right=0;
+        for(int i=0;i<n;i++){
+            if(i==0 || nums[i]!=nums[i-1]){
+                target = -nums[i];
+                
+                left = i+1,right = n-1;
+                while(left<right){
+                    if(nums[left]+nums[right]>target){
+                        right--;
+                    }else if(nums[left]+nums[right]<target){
+                        left++;
+                    }else{
+                        triplets.push_back({nums[i],nums[left],nums[right]});
+                        left++;
+                        right--;
+                        while(left<right && nums[left]==nums[left-1]) left++;
+                        while(left<right && nums[right]==nums[right+1]) right--;
+                    }
+                }
+            }
+        }
+        return triplets;
+    }
+
+void printarr(vector<int> &a){
+    cout<<"[";
+    for(int i=0;i<a.size();i++){
+        cout<<a[i]<<", ";
+    }
+    cout<<"]";
+}
+
+void printMat(vector<vector<int>> &mat){
+    int m = mat.size(),n = mat[0].size();
+    
+    cout<<"[";
+    for(int i=0;i<m;i++){
+        cout<<"[";
+        for(int j=0;j<n;j++){
+            cout<<mat[i][j]<<" ";
+        }
+        if(i==m-1) cout<<"]"; 
+        else cout<<"]"<<endl;
+    }
+    cout<<"]";
+}
+
+int main(){
+    vector<int> nums = {-1,0,1,2,-1,-4};
+
+    vector<vector<int>> triplets = threeSum(nums);
+    printMat(triplets);
+    return 0;
+}
